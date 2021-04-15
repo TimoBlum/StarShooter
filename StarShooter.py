@@ -16,6 +16,10 @@ num = 0
 winColor = [255, 255, 255]
 HP = 100
 Pwh = 50
+wave = 1
+shots = 0
+kills = 0
+lost = False
 
 EntitySpaceShips = [pygame.image.load("pics/small.jpg"), pygame.image.load("pics/medium.jpg"),
                     pygame.image.load("pics/boss.jpg"), pygame.image.load("pics/god.jpg"),
@@ -36,7 +40,9 @@ for i in range(1, 7):
     entityDroprate.append("healer")
 for i in range(1, 5):
     entityDroprate.append("quadshot")
-entityDroprate.append("god")
+for i in range(1, 2):
+    entityDroprate.append("god")
+
 
 # CLASSES CLASSES CLASSES
 
@@ -53,6 +59,8 @@ class Player:
         self.timer = 0
         self.quadshot = False
         self.quadshottimer = 0
+        self.nukes = 1
+        self.medkits = 1
 
     def draw(self):
         pygame.draw.rect(win, self.color, self.rect)
@@ -60,10 +68,19 @@ class Player:
         self.rect = (self.x, self.y, self.wh, self.wh)
 
     def move(self):
-        global FPS
+        global FPS, HP
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
             self.shoot()
+        if keys[pygame.K_s]:
+            if self.medkits == 1:
+                self.medkits -= 1
+                HP = 100
+            else:
+                textOnScreen(xy//2, xy//2, "No more Medkits", "", 20, color=(180, 180, 180))
+        if keys[pygame.K_r] and self.nukes > 0:
+            self.nukes -= 1
+            projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0,damage=1000 ,pic='pics/nuke.png'))
         if keys[pygame.K_d] and self.x < xy - self.wh - self.vel:
             self.x += self.vel
         if keys[pygame.K_a] and self.x > self.vel:
@@ -79,26 +96,31 @@ class Player:
             FPS = 60
 
     def shoot(self):
+        global shots
         if self.timer <= 0:
             if yn(Frame, 10):
                 if not self.quadshot:
                     projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0))
+                    shots += 1
                 else:
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 1))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 2))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -1))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -2))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 1, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 2, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -1, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -2, pic="pics/laser2.png"))
+                    shots += 5
         elif self.timer >= 0:
             if yn(Frame, 5):
                 if not self.quadshot:
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0, pic="pics/laser2.png"))
+                    shots += 1
                 else:
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 1))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 2))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -1))
-                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -2))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 0, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 1, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, 2, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -1, pic="pics/laser2.png"))
+                    projectiles.append(projectile(self.x + self.wh // 2-(self.wh//10), self.y, True, -2, pic="pics/laser2.png"))
+                    shots += 5
 
 
 class Entity:
@@ -117,7 +139,7 @@ class Entity:
         elif rank == "medium":
             self.wh = 50
             self.health = 8
-            self.damage = 10
+            self.damage = 8
             self.color = [255, 100, 100]
             self.vel = 1.5*random.random()
             self.image = pygame.transform.scale(pygame.transform.rotate(EntitySpaceShips[1], 180), (self.wh, self.wh))
@@ -126,14 +148,14 @@ class Entity:
             self.health = 2
             self.damage = 3
             self.color = [255, 150, 150]
-            self.vel = 2*random.random()
+            self.vel = random.randint(1, 2)
             self.image = pygame.transform.scale(pygame.transform.rotate(EntitySpaceShips[0], 180), (self.wh, self.wh))
         elif rank == "god":
-            self.wh = 50
-            self.health = 40
+            self.wh = 100
+            self.health = 45
             self.damage = 50
             self.color = [0, 0, 0]
-            self.vel = 0.7
+            self.vel = 0.6
             self.image = pygame.transform.scale(pygame.transform.rotate(EntitySpaceShips[3], 180), (self.wh, self.wh))
         elif rank == "firerate":
             self.wh = 40
@@ -184,46 +206,44 @@ class Entity:
 
     def removeIfDead(self):
         """If it dies, it is removed"""
-        global HP, winColor, FPS
+        global HP, winColor, FPS, kills
         if self.health <= 0:
             if self.rank == "firerate":
                 P.timer = 600
             if self.rank == "healer":
-                HP = 100
-                winColor = [255, 255, 255]
+                if P.medkits == 1:
+                    HP = 100
+                else:
+                    P.medkits += 1
             if self.rank == "quadshot":
                 P.quadshot = True
                 P.quadshottimer = 300
                 FPS = 100
+            kills += 1
             del enemies[findPlace(self, enemies)]
 
 
 class projectile:
-    def __init__(self, x, y, ud, xvel):
+    def __init__(self, x, y, ud, xvel, nuke=False, damage=1, pic="pics/laser.png"):
         """things to shoot at enemies"""
         self.x = x
         self.y = y
-        self.wh = 10
-        self.damage = 1
+        self.w = 10
+        self.h = 40
+        self.damage = damage
         self.num = num
         self.ud = ud
-        self.shadows = []
         self.xvel = xvel
-        self.rect = pygame.rect.Rect(self.x, self.y, self.wh, self.wh)
-        for s in range(5):
-            self.shadows.append(self.rect)
+        self.rect = pygame.rect.Rect(self.x, self.y, self.w, self.h)
+        self.pic = pic
+        self.image = pygame.image.load(self.pic)
+        self.strechedImage = pygame.transform.scale(pygame.transform.rotate(self.image, 90), (self.w, self.h))
 
     def draw(self):
-        self.rect = (self.x, self.y, self.wh, self.wh)
+        self.rect = (self.x, self.y, self.w, self.h)
         self.removeIfDead()
-        del self.shadows[0]
-        self.shadows.append(self.rect)
-        grey = [255, 255, 255]
-        for s in self.shadows:
-            pygame.draw.rect(win, grey, s)
-            grey[1] -= 50
-            grey[2] -= 50
         pygame.draw.rect(win, (255, 0, 0), self.rect)
+        win.blit(self.strechedImage, self.rect)
 
     def removeIfDead(self):
         """If it dies, it is removed"""
@@ -242,7 +262,7 @@ class projectile:
         # Bouncing off walls
         if self.x <= 0:
             self.xvel = - self.xvel
-        if self.x + self.wh >= xy:
+        if self.x + self.w >= xy:
             self.xvel = - self.xvel
 
 
@@ -254,15 +274,16 @@ enemies = [Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
            Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
            Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
            Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
-           Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]),
            Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)])]
+
+
+def textOnScreen(x, y, text1, text2, big, color=(220, 200, 200)):
+    font = pygame.font.Font('freesansbold.ttf', big)
+    txt = str(text1) + str(text2)
+    text = font.render(txt, True, color)
+    textRect = text.get_rect()
+    textRect.center = (x, y)
+    win.blit(text, textRect)
 
 
 def decideIfEntity(name):
@@ -310,28 +331,40 @@ def findPlace(s, lst):
             counter += 1
 
 
+# REDRAW GAME WINDOW
+
+
 def redrawWin():
-    global Frame, HP, winColor
-    win.fill(winColor)
-    pygame.draw.line(win, (230, 230, 230), (P.x + P.wh // 2, P.y), (P.x + P.wh // 2, 0))
+    global Frame, HP, winColor, FPS, lost
+    if not lost:
+        win.fill(winColor)
+        pygame.draw.line(win, (230, 230, 230), (P.x + P.wh // 2, P.y), (P.x + P.wh // 2, 0))
 
-    if projectiles:
-        for p in projectiles:
-            p.draw(), p.move()
-    P.move(), P.draw()
-    for e in enemies:
-        e.move(), e.draw()
-        for p in projectiles:
-            if detect(pygame.rect.Rect(p.rect), pygame.rect.Rect(e.rect)):
-                e.health -= 1
-                del projectiles[findPlace(p, projectiles)]
-        if e.y + e.wh >= xy:
-            HP -= e.damage
-            del enemies[findPlace(e, enemies)]
+        textOnScreen(xy//2, 30, "Wave Nr. ", str(wave), 28)
+        textOnScreen(xy//13, 30, "Medkits availiable: ", P.medkits, 15, color=(255, 80, 80))
 
-    displayhealthbar((P.x+P.wh//2, P.y), HP/100, 3)
-    if HP <= 0:
-        win.fill((255, 0, 0))
+        # Hitting enemies and enemies hitting your base
+        if projectiles:
+            for p in projectiles:
+                p.draw(), p.move()
+        P.move(), P.draw()
+        for e in enemies:
+            e.move(), e.draw()
+            for p in projectiles:
+                if detect(pygame.rect.Rect(p.rect), pygame.rect.Rect(e.rect)):
+                    e.health -= p.damage
+                    del projectiles[findPlace(p, projectiles)]
+            if e.y + e.wh >= xy:
+                HP -= e.damage
+                del enemies[findPlace(e, enemies)]
+
+        displayhealthbar((P.x+P.wh//2, P.y), HP/100, 3)
+        if HP <= 0:
+            lost = True
+    if lost:
+        textOnScreen(xy//2, xy//2, "YOU LOST", "", 40, color=(255, 0, 0))
+        textOnScreen(xy//12, 100, "enemies killed: ", str(kills), 18)
+        textOnScreen(xy//15, 130, "Shots fired: ", str(shots), 18)
     pygame.display.update()
     Frame += 1
 
@@ -340,8 +373,8 @@ def redrawWin():
 
 
 def main():
-    global run
-    diff = 2
+    global run, wave
+    diff = 6
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -352,6 +385,7 @@ def main():
             for i in range(0, diff):
                 enemies.append(Entity(entityDroprate[random.randint(0, len(entityDroprate) - 1)]))
             diff += 1
+            wave += 1
         if run:
             redrawWin()
 
