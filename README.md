@@ -7,3 +7,7 @@ this game!
 ![](https://github.com/TimoBlum/StarShooter/blob/main/SS2.png "Looks good doesn't it :)")
 
 ![](https://github.com/TimoBlum/StarShooter/blob/main/SS3.png "Looks good doesn't it :)")
+
+![](https://github.com/TimoBlum/StarShooter/blob/main/SS4.png "Looks good doesn't it :)")
+
+![](https://github.com/TimoBlum/StarShooter/blob/main/SS5.png "Looks good doesn't it :)")
